@@ -6,9 +6,6 @@ namespace smart_home_Asp.net.Domain.Entities
     {
          public  string Id { get; private set; }
         public string Name { get; private set; } = string.Empty;
-        protected Entity(string id)
-        {
-            Id = id;
-        }
+        
     }
 }

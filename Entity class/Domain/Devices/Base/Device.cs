@@ -4,10 +4,10 @@ namespace smart_home_Asp.net.Domain.Devices.Base
 {
    public abstract class Device : Entity
 {
-    public Device(string id) : base(id) { }
-    public bool IsOnline { get; protected set; }
+        public bool IsOnline { get; protected set; }
+        public int Roomid { get; set; }
+        public string ExternalId { get; set; }
 
 
-   
-}
+    }
 }

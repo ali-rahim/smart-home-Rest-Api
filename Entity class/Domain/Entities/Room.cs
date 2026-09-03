@@ -3,10 +3,11 @@
 
 namespace smart_home_Asp.net.Domain.Entities
 {
-    public class Room : CompositeEntity
+    public sealed class Room:Entity
     {
-        public Room(string id) : base(id) { }
-        protected override bool IsAllowedChild(Entity child) => child is Device;
+        public List<Device> Devices { get; set; }
+        public int homeid { get; set; }
+        
     }
 
 }

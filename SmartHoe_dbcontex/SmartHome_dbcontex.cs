@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using smart_home_Asp.net.Domain.Devices.Base;
 using smart_home_Asp.net.Domain.Entities;
 
 namespace SmartHoe_dbcontex
@@ -18,9 +19,10 @@ namespace SmartHoe_dbcontex
         }
 
 
-
+        public DbSet<Home> Homes { get; set; }
         public DbSet<Room> Rooms { get ;  set;}
-     
+        public DbSet<Device> Devices { get; set; }
+
 
 
 

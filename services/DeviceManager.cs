@@ -154,7 +154,7 @@ namespace smart_home_Asp.net.Services
                 _logger.LogDebug(
             "Get SensorValue. TDeviceId={DeviceId}", device.Id);
 
-                return digital.get_value();
+                return digital.get_Status();
             }
 
 

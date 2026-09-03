@@ -8,8 +8,9 @@ namespace smart_home_Asp.net.Domain.Devices.ability_interfaces
 { 
     public interface Idigital
     {
-        public bool sensor_value { get; set; }
-        public bool get_value();
+        public bool Status {  get; set; }
+
+        public bool Get_Status();
         
     }
 }

@@ -15,7 +15,9 @@ namespace SmartHoe_dbcontex.Configuration
             public void Configure(EntityTypeBuilder<Room> builder)
             {
                 builder.Property(c => c.Name).HasMaxLength(100);
-            }
-        
+                builder.HasMany(c => c.Devices).WithOne().HasForeignKey(c => c.Roomid).OnDelete(DeleteBehavior.Cascade);
+
+        }
+
     }
 }
