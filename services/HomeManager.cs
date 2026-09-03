@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using smart_home_Asp.net.Domain.Entities;
 using SmartHoe_dbcontex;
 
 namespace services
 {
-    public class HomeManager(SmartHome_dbcontex sdx)
+    public class HomeManager(SmartHome_dbcontex sdx, ILogger<Home> _logger)
     {
          public async Task<List<Home>> get_homeAsync()
          {
@@ -19,18 +20,15 @@ namespace services
 
 
 
-        public async Task<int> InsertdbhomeAsync(Home  home )
+        public async Task<int> InsertdbhomeAsync(Home  home)
         {
-            try
-            {
+            
                 sdx.Homes.Add(home);
                 await sdx.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                //_logger.LogError(ex, "Error while saving room to database");
-                throw;
-            }
+            _logger.LogInformation(
+           "Home created successfully. HomeId={home.Id}",
+               home.Id);
+
 
             return home.Id;
         }

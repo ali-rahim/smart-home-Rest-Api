@@ -23,6 +23,7 @@ namespace SmartHoe_dbcontex.Configuration
 
 
             builder.Property(c => c.Name).HasMaxLength(100);
+            builder.HasIndex(d => d.ExternalId).IsUnique();
 
         }
 

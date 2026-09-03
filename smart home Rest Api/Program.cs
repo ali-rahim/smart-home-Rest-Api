@@ -11,7 +11,6 @@ using smart_home_Asp.net.Configuration;
 using smart_home_Asp.net.Domain.Devices.ability_interfaces;
 using smart_home_Asp.net.Domain.Devices.Base;
 using smart_home_Asp.net.Domain.Entities;
-using smart_home_Asp.net.Services;
 using smart_home_Asp.net.YourProjectName.Middleware;
 using SmartHoe_dbcontex;
 using System.Threading.RateLimiting;

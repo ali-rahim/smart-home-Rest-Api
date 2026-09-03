@@ -196,12 +196,13 @@
 //}
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using smart_home_Asp.net.Domain.Entities;
 using SmartHoe_dbcontex;
 
 namespace services
 {
-    public class RoomManager(SmartHome_dbcontex sdx)
+    public class RoomManager(SmartHome_dbcontex sdx, ILogger<RoomManager> _logger)
     {
         public async Task<Room?> CreateRoomAsync(int homeId, string name)
         {
@@ -211,6 +212,10 @@ namespace services
             var room = new Room(name, homeId);
             sdx.Rooms.Add(room);
             await sdx.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Room created successfully. RoomId={room.Id}",
+                room.Id);
             return room;
         }
 

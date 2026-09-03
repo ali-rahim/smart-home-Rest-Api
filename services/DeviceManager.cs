@@ -173,12 +173,14 @@
 
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using smart_home_Asp.net.Domain.Devices.Base;
+using smart_home_Asp.net.Exceptions;
 using SmartHoe_dbcontex;
 
 namespace services
 {
-    public class DeviceManager(SmartHome_dbcontex sdx)
+    public class DeviceManager(SmartHome_dbcontex sdx, ILogger<DeviceManager> _logger)
     {
         public async Task<Device?> CreateDeviceAsync(int roomId, DeviceType type, string name, string externalId)
         {
@@ -187,7 +189,19 @@ namespace services
 
             var device = DeviceFactory.Create(type, name, roomId, externalId);
             sdx.Devices.Add(device);
-            await sdx.SaveChangesAsync();
+
+            try
+            {
+                await sdx.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new EntityAlreadyExistsException(externalId);
+            }
+
+            _logger.LogInformation(
+              "Device created successfully. DeviceId={device.Id}",
+             device.Id);
             return device;
         }
 
