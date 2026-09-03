@@ -6,6 +6,9 @@ namespace smart_home_Asp.net.Domain.Devices
     public class Rain_sensor : Device , Ianalog
     {
 
+        public Rain_sensor(string name, int roomid, string externalId) : base(name, roomid, externalId) { }
+        private Rain_sensor() { } // EF Core
+
         public double value_sensor { get; set; } = 25.85;
 
 

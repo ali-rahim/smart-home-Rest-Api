@@ -194,3 +194,32 @@
 //        }
 //    }
 //}
+
+using Microsoft.EntityFrameworkCore;
+using smart_home_Asp.net.Domain.Entities;
+using SmartHoe_dbcontex;
+
+namespace services
+{
+    public class RoomManager(SmartHome_dbcontex sdx)
+    {
+        public async Task<Room?> CreateRoomAsync(int homeId, string name)
+        {
+            var homeExists = await sdx.Homes.AnyAsync(h => h.Id == homeId);
+            if (!homeExists) return null;
+
+            var room = new Room(name, homeId);
+            sdx.Rooms.Add(room);
+            await sdx.SaveChangesAsync();
+            return room;
+        }
+
+        public async Task<List<Room>> GetRoomsByHomeAsync(int homeId)
+        {
+            return await sdx.Rooms
+                .Where(r => r.homeid == homeId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+    }
+}

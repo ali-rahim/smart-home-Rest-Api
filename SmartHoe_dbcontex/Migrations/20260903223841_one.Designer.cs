@@ -11,7 +11,7 @@ using SmartHoe_dbcontex;
 namespace SmartHoe_dbcontex.Migrations
 {
     [DbContext(typeof(SmartHome_dbcontex))]
-    [Migration("20260903213932_one")]
+    [Migration("20260903223841_one")]
     partial class one
     {
         /// <inheritdoc />

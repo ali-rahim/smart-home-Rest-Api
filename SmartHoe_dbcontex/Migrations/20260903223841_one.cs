@@ -49,7 +49,7 @@ namespace SmartHoe_dbcontex.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DeviceType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DeviceType = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     IsOnline = table.Column<bool>(type: "bit", nullable: false),
                     Roomid = table.Column<int>(type: "int", nullable: false),
                     ExternalId = table.Column<string>(type: "nvarchar(max)", nullable: false),

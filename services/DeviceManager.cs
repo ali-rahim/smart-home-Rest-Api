@@ -17,7 +17,7 @@
 
 //        public Device CreateDevice(DeviceType type, string id)
 //        {
-          
+
 //                _logger.LogDebug(
 //                    "Creating device. DeviceId={DeviceId}, Type={DeviceType}",
 //                    id, type);
@@ -48,9 +48,9 @@
 //                _logger.LogInformation(
 //                    "Device created successfully. DeviceId={DeviceId}, Type={DeviceType}, TotalDevices={TotalDevices}",
 //                    id, type, _devices.Count);
-           
+
 //            return device;
-            
+
 //        }
 
 //        public void RemoveDevice(string id)
@@ -139,7 +139,7 @@
 //                  "Device Turn_On successfully. DeviceId={DeviceId}",
 //                  device.Id);
 //            }
-         
+
 
 
 //        }
@@ -147,7 +147,7 @@
 //        public object GetSensorValue(Device device)
 //        {
 
-          
+
 
 //            if (device is Idigital digital)
 //            {
@@ -163,10 +163,40 @@
 //                _logger.LogDebug(
 //             "Get SensorValue. TDeviceId={DeviceId}", device.Id);
 //                return analog.get_value();
-                
+
 //            }
 //            throw new InvalidOperationException("This device is not a sensor (neither digital nor analog).");
 //        }
 
 //    }
 //}
+
+
+using Microsoft.EntityFrameworkCore;
+using smart_home_Asp.net.Domain.Devices.Base;
+using SmartHoe_dbcontex;
+
+namespace services
+{
+    public class DeviceManager(SmartHome_dbcontex sdx)
+    {
+        public async Task<Device?> CreateDeviceAsync(int roomId, DeviceType type, string name, string externalId)
+        {
+            var roomExists = await sdx.Rooms.AnyAsync(r => r.Id == roomId);
+            if (!roomExists) return null;
+
+            var device = DeviceFactory.Create(type, name, roomId, externalId);
+            sdx.Devices.Add(device);
+            await sdx.SaveChangesAsync();
+            return device;
+        }
+
+        public async Task<List<Device>> GetDevicesByRoomAsync(int roomId)
+        {
+            return await sdx.Devices
+                .Where(d => d.Roomid == roomId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+    }
+}

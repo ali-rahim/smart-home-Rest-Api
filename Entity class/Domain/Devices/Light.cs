@@ -5,6 +5,9 @@ namespace smart_home_Asp.net.Domain.Devices
 {
     public class Light : Device, Iswitchable
     {
+        public Light(string name, int roomid, string externalId) : base(name, roomid, externalId) { }
+        private Light() { } // EF Core
+
         public bool IsOn { get ; set ; }=false;
 
         public void Turn_off()

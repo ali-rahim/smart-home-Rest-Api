@@ -5,7 +5,8 @@ namespace smart_home_Asp.net.Domain.Devices
 {
     public class SecurityAlarm : Device, Iswitchable
     {
-
+        public SecurityAlarm(string name, int roomid, string externalId) : base(name, roomid, externalId) { }
+        private SecurityAlarm() { } // EF Core
         public bool IsOn { get ; set ; }
 
 
