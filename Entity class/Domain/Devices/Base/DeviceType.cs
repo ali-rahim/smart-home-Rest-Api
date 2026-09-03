@@ -1,13 +1,13 @@
 ﻿namespace smart_home_Asp.net.Domain.Devices.Base
 {
-    
-        public enum DeviceType
-        {
-        rain_sensor,
+
+    public enum DeviceType
+    {
+        Fan,
         Light,
-        fan,
-        dozdgir,
-        door_sensor,
-        }
-    
+        RainSensor,
+        SecurityAlarm,
+        DoorSensor
+    }
+
 }

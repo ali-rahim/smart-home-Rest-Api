@@ -16,6 +16,7 @@ namespace SmartHoe_dbcontex
         {
             modelBuilder.ApplyConfigurationsFromAssembly(this.GetType().Assembly);
             base.OnModelCreating(modelBuilder);
+
         }
 
 

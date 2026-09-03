@@ -14,6 +14,10 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Entity class\Entity class.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Migrations\" />
+	</ItemGroup>
 	
 	
 	
