@@ -1,7 +1,7 @@
 ﻿using smart_home_Asp.net.Domain.Devices.ability_interfaces;
 using smart_home_Asp.net.Domain.Devices.Base;
 
-namespace smart_home_Asp.net.Domain.Devices
+namespace Entity_class.Domain.Devices.type
 {
     public class door_sensor : Device, Idigital
     {

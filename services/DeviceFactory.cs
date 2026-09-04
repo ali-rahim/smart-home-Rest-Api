@@ -1,4 +1,5 @@
-﻿using smart_home_Asp.net.Domain.Devices;
+﻿using Entity_class.Domain.Devices.type;
+using smart_home_Asp.net.Domain.Devices;
 using smart_home_Asp.net.Domain.Devices.Base;
 
 namespace services

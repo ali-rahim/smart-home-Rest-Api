@@ -73,10 +73,10 @@ namespace smart_home_Rest_Api.serviceandpipeline
 
             //DI
             builder.Services.AddScoped<HomeManager>();
-
             builder.Services.AddScoped<DeviceManager>();
             builder.Services.AddScoped<RoomManager>();
-
+            builder.Services.AddScoped<DeviceCommandManager>();
+            builder.Services.AddScoped<DeviceReadingManager>();
 
 
             //builder.Services.AddScoped<HomeService>();
@@ -128,6 +128,7 @@ namespace smart_home_Rest_Api.serviceandpipeline
             app.mapHomes("/homes");
             app.mapRooms("/homes/{homeId:int}/rooms");
             app.mapDevices("/rooms/{roomId:int}/devices");
+            app.mapDevices_manage("/devices");
 
 
 

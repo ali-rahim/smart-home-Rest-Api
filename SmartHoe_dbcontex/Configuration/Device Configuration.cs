@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Entity_class.Domain.Devices.type;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using smart_home_Asp.net.Domain.Devices;
 using smart_home_Asp.net.Domain.Devices.Base;
 
 namespace SmartHoe_dbcontex.Configuration

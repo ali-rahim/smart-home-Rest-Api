@@ -28,4 +28,13 @@ namespace SmartHoe_dbcontex
         public int RoomId { get; set; }
         public bool IsOnline { get; set; }
     }
+    public class DeviceReadingResponse
+    {
+        public int Id { get; set; }
+        public int DeviceId { get; set; }
+        public string Kind { get; set; } = string.Empty;
+        public double? NumericValue { get; set; }
+        public bool? BoolValue { get; set; }
+        public DateTime RecordedAt { get; set; }
+    }
 }
