@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
 using Serilog;
@@ -11,16 +13,22 @@ using smart_home_Asp.net.Configuration;
 using smart_home_Asp.net.Domain.Devices.ability_interfaces;
 using smart_home_Asp.net.Domain.Devices.Base;
 using smart_home_Asp.net.Domain.Entities;
+using smart_home_Asp.net.Dtos;
+using smart_home_Asp.net.Mapping;
 using smart_home_Asp.net.YourProjectName.Middleware;
 using SmartHoe_dbcontex;
 using System.Threading.RateLimiting;
 using static Azure.Core.HttpHeader;
-using smart_home_Asp.net.Dtos;
+
 public class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        //AutoMapper
+        // قبلی — دیگه کامپایل نمی‌شه
+        builder.Services.AddAutoMapper(typeof(MappingProfile));
 
         //Serilog
         builder.Host.UseSerilog((context, services, configuration) =>
@@ -33,7 +41,6 @@ public class Program
                     "serilag")
                 .ReadFrom.Configuration(context.Configuration); //seq هم تنظیم شده
         });
-
         //RateLimiter
         builder.Services.AddRateLimiter(options =>
         {
@@ -55,6 +62,8 @@ public class Program
                             }));
         });
 
+        //OpenApi
+        builder.Services.AddOpenApi();
 
 
         //AddHsts
@@ -79,9 +88,7 @@ public class Program
         //builder.Services.AddScoped<HomeService>();
 
 
-
-
-        builder.Services.AddOpenApi();
+        //EF
         builder.Services.AddDbContext<SmartHome_dbcontex>((serviceProvider, options) =>
         {
             var storageOptions = serviceProvider.GetRequiredService<IOptions<StorageOptions>>();
@@ -142,42 +149,32 @@ public class Program
 
         app.MapGet("/", () => "Hello World!");
         // ---------- home ----------
+        // ---------- home ----------
 
-        app.MapPost("/homes", async (Home home, HomeManager homeManager) =>
+        app.MapPost("/homes", async (Home home, HomeManager homeManager, IMapper mapper) =>
         {
+            var id = await homeManager.InsertdbhomeAsync(home);
+            var created = await homeManager.get_homeAsync(id);
+            return Results.Created($"/homes/{id}", mapper.Map<HomeResponse>(created));
+        }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)).Tag("homes"));
 
-            var result = await homeManager.InsertdbhomeAsync(home);
-            return Results.Created($"/homes/{result}", home);
-
-        }).CacheOutput(c =>
+        app.MapGet("/homes", async (HomeManager homeManager, IOutputCacheStore CacheStore, IMapper mapper) =>
         {
-            c.Expire(TimeSpan.FromSeconds(15)).Tag("homes");
-        });
-
-        app.MapGet("/homes" , async (HomeManager homeManager ,IOutputCacheStore CacheStore ) =>
-        {
-            var result = await homeManager.get_homeAsync();
+            var homes = await homeManager.get_homeAsync();
             await CacheStore.EvictByTagAsync("homes", default);
-            return Results.Ok<List<Home>>(result);
-
-
+            return Results.Ok(mapper.Map<List<HomeResponse>>(homes));
         });
 
-        app.MapGet("/homes/{id:int}", async (HomeManager homeManager , int id ) =>
+        app.MapGet("/homes/{id:int}", async (HomeManager homeManager, int id, IMapper mapper) =>
         {
-            var result = await homeManager.get_homeAsync(id);
-            if(result == null)
-            {
-                return Results.NotFound();
-            }
-            return Results.Ok(result);
-
+            var home = await homeManager.get_homeAsync(id);
+            return home is null ? Results.NotFound() : Results.Ok(mapper.Map<HomeResponse>(home));
         });
 
-        app.MapPut("/homes/{id:int}", async (int id, UpdateHomeRequest request, HomeManager homeManager) =>
+        app.MapPut("/homes/{id:int}", async (int id, UpdateHomeRequest request, HomeManager homeManager, IMapper mapper) =>
         {
             var home = await homeManager.UpdateHomeAsync(id, request.Name);
-            return home is null ? Results.NotFound($"Home {id} not found.") : Results.Ok(home);
+            return home is null ? Results.NotFound($"Home {id} not found.") : Results.Ok(mapper.Map<HomeResponse>(home));
         });
 
         app.MapDelete("/homes/{id:int}", async (int id, HomeManager homeManager) =>
@@ -186,28 +183,27 @@ public class Program
             return deleted ? Results.NoContent() : Results.NotFound($"Home {id} not found.");
         });
 
-
         // ---------- Room ----------
 
-        app.MapPost("/homes/{homeId:int}/rooms", async (int homeId, RoomRequest request, RoomManager roomManager) =>
+        app.MapPost("/homes/{homeId:int}/rooms", async (int homeId, RoomRequest request, RoomManager roomManager, IMapper mapper) =>
         {
             var room = await roomManager.CreateRoomAsync(homeId, request.Name);
-            if (room is null)
-                return Results.NotFound($"Home {homeId} not found.");
-
-            return Results.Created($"/homes/{homeId}/rooms/{room.Id}", room);
+            if (room is null) return Results.NotFound($"Home {homeId} not found.");
+            return Results.Created($"/homes/{homeId}/rooms/{room.Id}", mapper.Map<RoomResponse>(room));
         });
 
-        app.MapGet("/homes/{homeId:int}/rooms", async (int homeId, RoomManager roomManager) =>
+        app.MapGet("/homes/{homeId:int}/rooms", async (int homeId, RoomManager roomManager, IMapper mapper) =>
         {
             var rooms = await roomManager.GetRoomsByHomeAsync(homeId);
-            return Results.Ok(rooms);
+            return Results.Ok(mapper.Map<List<RoomResponse>>(rooms));
         });
-        app.MapPut("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomRequest request, RoomManager roomManager) =>
+
+        app.MapPut("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomRequest request, RoomManager roomManager, IMapper mapper) =>
         {
             var room = await roomManager.UpdateRoomAsync(homeId, roomId, request.Name);
-            return room is null ? Results.NotFound($"Room {roomId} not found in home {homeId}.") : Results.Ok(room);
+            return room is null ? Results.NotFound($"Room {roomId} not found in home {homeId}.") : Results.Ok(mapper.Map<RoomResponse>(room));
         });
+
         app.MapDelete("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomManager roomManager) =>
         {
             var deleted = await roomManager.DeleteRoomAsync(homeId, roomId);
@@ -216,38 +212,33 @@ public class Program
 
         // ---------- Device ----------
 
-        app.MapPost("/rooms/{roomId:int}/devices", async (int roomId, CreateDeviceRequest request, DeviceManager deviceManager) =>
+        app.MapPost("/rooms/{roomId:int}/devices", async (int roomId, CreateDeviceRequest request, DeviceManager deviceManager, IMapper mapper) =>
         {
             if (!Enum.TryParse<DeviceType>(request.DeviceType, true, out var type))
                 return Results.BadRequest($"Unknown device type '{request.DeviceType}'.");
 
             var device = await deviceManager.CreateDeviceAsync(roomId, type, request.Name, request.ExternalId);
-            if (device is null)
-                return Results.NotFound($"Room {roomId} not found.");
-
-            return Results.Created($"/rooms/{roomId}/devices/{device.Id}", device);
+            if (device is null) return Results.NotFound($"Room {roomId} not found.");
+            return Results.Created($"/rooms/{roomId}/devices/{device.Id}", mapper.Map<DeviceResponse>(device));
         });
 
-        app.MapGet("/rooms/{roomId:int}/devices", async (int roomId, DeviceManager deviceManager) =>
+        app.MapGet("/rooms/{roomId:int}/devices", async (int roomId, DeviceManager deviceManager, IMapper mapper) =>
         {
             var devices = await deviceManager.GetDevicesByRoomAsync(roomId);
-            return Results.Ok(devices);
+            return Results.Ok(mapper.Map<List<DeviceResponse>>(devices));
         });
 
-        app.MapPut("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, UpdateDeviceRequest request, DeviceManager deviceManager) =>
+        app.MapPut("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, UpdateDeviceRequest request, DeviceManager deviceManager, IMapper mapper) =>
         {
             var device = await deviceManager.UpdateDeviceAsync(roomId, deviceId, request.Name, request.ExternalId);
-            return device is null ? Results.NotFound($"Device {deviceId} not found in room {roomId}.") : Results.Ok(device);
+            return device is null ? Results.NotFound($"Device {deviceId} not found in room {roomId}.") : Results.Ok(mapper.Map<DeviceResponse>(device));
         });
+
         app.MapDelete("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, DeviceManager deviceManager) =>
         {
             var deleted = await deviceManager.DeleteDeviceAsync(roomId, deviceId);
             return deleted ? Results.NoContent() : Results.NotFound($"Device {deviceId} not found in room {roomId}.");
         });
-
-
-
-
 
 
 
