@@ -180,6 +180,12 @@ public class Program
             return home is null ? Results.NotFound($"Home {id} not found.") : Results.Ok(home);
         });
 
+        app.MapDelete("/homes/{id:int}", async (int id, HomeManager homeManager) =>
+        {
+            var deleted = await homeManager.DeleteHomeAsync(id);
+            return deleted ? Results.NoContent() : Results.NotFound($"Home {id} not found.");
+        });
+
 
         // ---------- Room ----------
 
@@ -201,6 +207,11 @@ public class Program
         {
             var room = await roomManager.UpdateRoomAsync(homeId, roomId, request.Name);
             return room is null ? Results.NotFound($"Room {roomId} not found in home {homeId}.") : Results.Ok(room);
+        });
+        app.MapDelete("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomManager roomManager) =>
+        {
+            var deleted = await roomManager.DeleteRoomAsync(homeId, roomId);
+            return deleted ? Results.NoContent() : Results.NotFound($"Room {roomId} not found in home {homeId}.");
         });
 
         // ---------- Device ----------
@@ -227,6 +238,11 @@ public class Program
         {
             var device = await deviceManager.UpdateDeviceAsync(roomId, deviceId, request.Name, request.ExternalId);
             return device is null ? Results.NotFound($"Device {deviceId} not found in room {roomId}.") : Results.Ok(device);
+        });
+        app.MapDelete("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, DeviceManager deviceManager) =>
+        {
+            var deleted = await deviceManager.DeleteDeviceAsync(roomId, deviceId);
+            return deleted ? Results.NoContent() : Results.NotFound($"Device {deviceId} not found in room {roomId}.");
         });
 
 

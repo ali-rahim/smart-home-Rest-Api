@@ -42,7 +42,15 @@ namespace services
             await sdx.SaveChangesAsync();
             return home;
         }
+        public async Task<bool> DeleteHomeAsync(int id)
+        {
+            var home = await sdx.Homes.FirstOrDefaultAsync(h => h.Id == id);
+            if (home is null) return false;
 
+            sdx.Homes.Remove(home);
+            await sdx.SaveChangesAsync();
+            return true;
+        }
 
     }
 }

@@ -236,5 +236,14 @@ namespace services
             await sdx.SaveChangesAsync();
             return room;
         }
+        public async Task<bool> DeleteRoomAsync(int homeId, int roomId)
+        {
+            var room = await sdx.Rooms.FirstOrDefaultAsync(r => r.Id == roomId && r.homeid == homeId);
+            if (room is null) return false;
+
+            sdx.Rooms.Remove(room);
+            await sdx.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -236,5 +236,14 @@ namespace services
 
             return device;
         }
+        public async Task<bool> DeleteDeviceAsync(int roomId, int deviceId)
+        {
+            var device = await sdx.Devices.FirstOrDefaultAsync(d => d.Id == deviceId && d.Roomid == roomId);
+            if (device is null) return false;
+
+            sdx.Devices.Remove(device);
+            await sdx.SaveChangesAsync();
+            return true;
+        }
     }
 }
