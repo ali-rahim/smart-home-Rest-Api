@@ -144,51 +144,50 @@ public class Program
 
 
         // ---------- End points ----------
-
-
-
         app.MapGet("/", () => "Hello World!");
         // ---------- home ----------
-        // ---------- home ----------
-
-        app.MapPost("/homes", async (Home home, HomeManager homeManager, IMapper mapper) =>
+        app.MapPost("/homes", async (Home home, HomeManager homeManager, IOutputCacheStore CacheStore, IMapper mapper) =>
         {
             var id = await homeManager.InsertdbhomeAsync(home);
+            await CacheStore.EvictByTagAsync("homes", default);
             var created = await homeManager.get_homeAsync(id);
             return Results.Created($"/homes/{id}", mapper.Map<HomeResponse>(created));
-        }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)).Tag("homes"));
+        });
 
-        app.MapGet("/homes", async (HomeManager homeManager, IOutputCacheStore CacheStore, IMapper mapper) =>
+        app.MapGet("/homes", async (HomeManager homeManager, IMapper mapper) =>
         {
             var homes = await homeManager.get_homeAsync();
-            await CacheStore.EvictByTagAsync("homes", default);
             return Results.Ok(mapper.Map<List<HomeResponse>>(homes));
-        });
+        }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)).Tag("homes"));
 
         app.MapGet("/homes/{id:int}", async (HomeManager homeManager, int id, IMapper mapper) =>
         {
             var home = await homeManager.get_homeAsync(id);
             return home is null ? Results.NotFound() : Results.Ok(mapper.Map<HomeResponse>(home));
-        });
+        }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)).Tag("homes"));
 
-        app.MapPut("/homes/{id:int}", async (int id, UpdateHomeRequest request, HomeManager homeManager, IMapper mapper) =>
+        app.MapPut("/homes/{id:int}", async (int id, UpdateHomeRequest request, HomeManager homeManager, IMapper mapper, IOutputCacheStore CacheStore) =>
         {
             var home = await homeManager.UpdateHomeAsync(id, request.Name);
-            return home is null ? Results.NotFound($"Home {id} not found.") : Results.Ok(mapper.Map<HomeResponse>(home));
+            if (home is null) return Results.NotFound($"Home {id} not found.");
+            await CacheStore.EvictByTagAsync("homes", default);
+            return Results.Ok(mapper.Map<HomeResponse>(home));
         });
 
-        app.MapDelete("/homes/{id:int}", async (int id, HomeManager homeManager) =>
+        app.MapDelete("/homes/{id:int}", async (int id, HomeManager homeManager, IOutputCacheStore CacheStore) =>
         {
             var deleted = await homeManager.DeleteHomeAsync(id);
-            return deleted ? Results.NoContent() : Results.NotFound($"Home {id} not found.");
+            if (!deleted) return Results.NotFound($"Home {id} not found.");
+            await CacheStore.EvictByTagAsync("homes", default);
+            return Results.NoContent();
         });
 
         // ---------- Room ----------
-
-        app.MapPost("/homes/{homeId:int}/rooms", async (int homeId, RoomRequest request, RoomManager roomManager, IMapper mapper) =>
+        app.MapPost("/homes/{homeId:int}/rooms", async (int homeId, RoomRequest request, RoomManager roomManager, IMapper mapper, IOutputCacheStore CacheStore) =>
         {
             var room = await roomManager.CreateRoomAsync(homeId, request.Name);
             if (room is null) return Results.NotFound($"Home {homeId} not found.");
+            await CacheStore.EvictByTagAsync("rooms", default);
             return Results.Created($"/homes/{homeId}/rooms/{room.Id}", mapper.Map<RoomResponse>(room));
         });
 
@@ -196,29 +195,33 @@ public class Program
         {
             var rooms = await roomManager.GetRoomsByHomeAsync(homeId);
             return Results.Ok(mapper.Map<List<RoomResponse>>(rooms));
-        });
+        }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)).Tag("rooms"));
 
-        app.MapPut("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomRequest request, RoomManager roomManager, IMapper mapper) =>
+        app.MapPut("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomRequest request, RoomManager roomManager, IMapper mapper, IOutputCacheStore CacheStore) =>
         {
             var room = await roomManager.UpdateRoomAsync(homeId, roomId, request.Name);
-            return room is null ? Results.NotFound($"Room {roomId} not found in home {homeId}.") : Results.Ok(mapper.Map<RoomResponse>(room));
+            if (room is null) return Results.NotFound($"Room {roomId} not found in home {homeId}.");
+            await CacheStore.EvictByTagAsync("rooms", default);
+            return Results.Ok(mapper.Map<RoomResponse>(room));
         });
 
-        app.MapDelete("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomManager roomManager) =>
+        app.MapDelete("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomManager roomManager, IOutputCacheStore CacheStore) =>
         {
             var deleted = await roomManager.DeleteRoomAsync(homeId, roomId);
-            return deleted ? Results.NoContent() : Results.NotFound($"Room {roomId} not found in home {homeId}.");
+            if (!deleted) return Results.NotFound($"Room {roomId} not found in home {homeId}.");
+            await CacheStore.EvictByTagAsync("rooms", default);
+            return Results.NoContent();
         });
 
         // ---------- Device ----------
-
-        app.MapPost("/rooms/{roomId:int}/devices", async (int roomId, CreateDeviceRequest request, DeviceManager deviceManager, IMapper mapper) =>
+        app.MapPost("/rooms/{roomId:int}/devices", async (int roomId, CreateDeviceRequest request, DeviceManager deviceManager, IMapper mapper, IOutputCacheStore CacheStore) =>
         {
             if (!Enum.TryParse<DeviceType>(request.DeviceType, true, out var type))
                 return Results.BadRequest($"Unknown device type '{request.DeviceType}'.");
 
             var device = await deviceManager.CreateDeviceAsync(roomId, type, request.Name, request.ExternalId);
             if (device is null) return Results.NotFound($"Room {roomId} not found.");
+            await CacheStore.EvictByTagAsync("devices", default);
             return Results.Created($"/rooms/{roomId}/devices/{device.Id}", mapper.Map<DeviceResponse>(device));
         });
 
@@ -226,36 +229,27 @@ public class Program
         {
             var devices = await deviceManager.GetDevicesByRoomAsync(roomId);
             return Results.Ok(mapper.Map<List<DeviceResponse>>(devices));
-        });
+        }).CacheOutput(c => c.Expire(TimeSpan.FromSeconds(15)).Tag("devices"));
 
-        app.MapPut("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, UpdateDeviceRequest request, DeviceManager deviceManager, IMapper mapper) =>
+        app.MapPut("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, UpdateDeviceRequest request, DeviceManager deviceManager, IMapper mapper, IOutputCacheStore CacheStore) =>
         {
             var device = await deviceManager.UpdateDeviceAsync(roomId, deviceId, request.Name, request.ExternalId);
-            return device is null ? Results.NotFound($"Device {deviceId} not found in room {roomId}.") : Results.Ok(mapper.Map<DeviceResponse>(device));
+            if (device is null) return Results.NotFound($"Device {deviceId} not found in room {roomId}.");
+            await CacheStore.EvictByTagAsync("devices", default);
+            return Results.Ok(mapper.Map<DeviceResponse>(device));
         });
 
-        app.MapDelete("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, DeviceManager deviceManager) =>
+        app.MapDelete("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, DeviceManager deviceManager, IOutputCacheStore CacheStore) =>
         {
             var deleted = await deviceManager.DeleteDeviceAsync(roomId, deviceId);
-            return deleted ? Results.NoContent() : Results.NotFound($"Device {deviceId} not found in room {roomId}.");
+            if (!deleted) return Results.NotFound($"Device {deviceId} not found in room {roomId}.");
+            await CacheStore.EvictByTagAsync("devices", default);
+            return Results.NoContent();
         });
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        app.Run();
 
 
 
@@ -465,7 +459,6 @@ public class Program
         //        });
 
 
-        app.Run();
 
     }
 }
