@@ -226,5 +226,15 @@ namespace services
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<Room?> UpdateRoomAsync(int homeId, int roomId, string name)
+        {
+            var room = await sdx.Rooms.FirstOrDefaultAsync(r => r.Id == roomId && r.homeid == homeId);
+            if (room is null) return null;
+
+            room.Rename(name);
+            await sdx.SaveChangesAsync();
+            return room;
+        }
     }
 }

@@ -174,9 +174,16 @@ public class Program
 
         });
 
+        app.MapPut("/homes/{id:int}", async (int id, UpdateHomeRequest request, HomeManager homeManager) =>
+        {
+            var home = await homeManager.UpdateHomeAsync(id, request.Name);
+            return home is null ? Results.NotFound($"Home {id} not found.") : Results.Ok(home);
+        });
+
+
         // ---------- Room ----------
 
-        app.MapPost("/homes/{homeId:int}/rooms", async (int homeId, CreateRoomRequest request, RoomManager roomManager) =>
+        app.MapPost("/homes/{homeId:int}/rooms", async (int homeId, RoomRequest request, RoomManager roomManager) =>
         {
             var room = await roomManager.CreateRoomAsync(homeId, request.Name);
             if (room is null)
@@ -189,6 +196,11 @@ public class Program
         {
             var rooms = await roomManager.GetRoomsByHomeAsync(homeId);
             return Results.Ok(rooms);
+        });
+        app.MapPut("/homes/{homeId:int}/rooms/{roomId:int}", async (int homeId, int roomId, RoomRequest request, RoomManager roomManager) =>
+        {
+            var room = await roomManager.UpdateRoomAsync(homeId, roomId, request.Name);
+            return room is null ? Results.NotFound($"Room {roomId} not found in home {homeId}.") : Results.Ok(room);
         });
 
         // ---------- Device ----------
@@ -210,6 +222,34 @@ public class Program
             var devices = await deviceManager.GetDevicesByRoomAsync(roomId);
             return Results.Ok(devices);
         });
+
+        app.MapPut("/rooms/{roomId:int}/devices/{deviceId:int}", async (int roomId, int deviceId, UpdateDeviceRequest request, DeviceManager deviceManager) =>
+        {
+            var device = await deviceManager.UpdateDeviceAsync(roomId, deviceId, request.Name, request.ExternalId);
+            return device is null ? Results.NotFound($"Device {deviceId} not found in room {roomId}.") : Results.Ok(device);
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         //// ---------- Room ----------

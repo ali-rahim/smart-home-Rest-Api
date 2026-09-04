@@ -212,5 +212,29 @@ namespace services
                 .AsNoTracking()
                 .ToListAsync();
         }
+        public async Task<Device?> UpdateDeviceAsync(int roomId, int deviceId, string name, string externalId)
+        {
+            var device = await sdx.Devices.FirstOrDefaultAsync(d => d.Id == deviceId && d.Roomid == roomId);
+            if (device is null) return null;
+
+            var externalIdTakenByAnother = await sdx.Devices
+                .AnyAsync(d => d.ExternalId == externalId && d.Id != deviceId);
+            if (externalIdTakenByAnother)
+                throw new EntityAlreadyExistsException(externalId);
+
+            device.Rename(name);
+            device.ExternalId = externalId;
+
+            try
+            {
+                await sdx.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new EntityAlreadyExistsException(externalId);
+            }
+
+            return device;
+        }
     }
 }

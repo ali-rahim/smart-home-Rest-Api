@@ -33,7 +33,15 @@ namespace services
             return home.Id;
         }
 
+        public async Task<Home?> UpdateHomeAsync(int id, string name)
+        {
+            var home = await sdx.Homes.FirstOrDefaultAsync(h => h.Id == id);
+            if (home is null) return null;
 
+            home.Rename(name);
+            await sdx.SaveChangesAsync();
+            return home;
+        }
 
 
     }

@@ -14,5 +14,13 @@ namespace smart_home_Asp.net.Domain.Entities
 
         // برای EF Core لازمه
         protected Entity() { }
+
+        public void Rename(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name cannot be empty.", nameof(name));
+
+            Name = name;
+        }
     }
 }
