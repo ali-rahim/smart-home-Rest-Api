@@ -13,11 +13,6 @@
     <ProjectReference Include="..\SmartHoe_dbcontex\SmartHoe_dbcontex.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Events\" />
-    <Folder Include="Storage\" />
-  </ItemGroup>
-
 
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="13.0.1" />
