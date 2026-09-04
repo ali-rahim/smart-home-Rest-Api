@@ -134,8 +134,8 @@ public class Program
         //Endpoints
 
         app.mapHomes("/homes");
-        app.mapHomes("homes/{homeId:int}/rooms");
-        app.mapHomes("/rooms/{roomId:int}/devices");
+        app.mapRooms("homes/{homeId:int}/rooms");
+        app.mapdevice("/rooms/{roomId:int}/devices");
 
 
 

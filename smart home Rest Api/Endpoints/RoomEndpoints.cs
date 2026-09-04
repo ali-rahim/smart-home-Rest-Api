@@ -10,7 +10,7 @@ namespace smart_home_Rest_Api.Endpoints
     {
         static string cachkey = "rooms";
 
-        public static WebApplication mapRooms(this WebApplication app, string prefix)
+        public static WebApplication mapdevice(this WebApplication app, string prefix)
         {
             var rooms = app.MapGroup(prefix);
 
