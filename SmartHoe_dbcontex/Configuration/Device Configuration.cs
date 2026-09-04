@@ -19,6 +19,7 @@ namespace SmartHoe_dbcontex.Configuration
                 .HasValue<Light>("Light")
                 .HasValue<Rain_sensor>("RainSensor")
                 .HasValue<SecurityAlarm>("SecurityAlarm")
+                .HasValue<Heater>("Heater")
                 .HasValue<door_sensor>("DoorSensor");
 
 

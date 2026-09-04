@@ -15,6 +15,7 @@ namespace services
                 DeviceType.SecurityAlarm => new SecurityAlarm(name, roomId, externalId),
                 DeviceType.DoorSensor => new door_sensor(name, roomId, externalId),
                 DeviceType.RainSensor => new Rain_sensor(name, roomId, externalId),
+                DeviceType.Heater => new Heater(name, roomId, externalId),
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown device type.")
             };
         }

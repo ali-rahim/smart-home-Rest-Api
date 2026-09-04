@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartHoe_dbcontex;
 
@@ -11,9 +12,11 @@ using SmartHoe_dbcontex;
 namespace SmartHoe_dbcontex.Migrations
 {
     [DbContext(typeof(SmartHome_dbcontex))]
-    partial class SmartHome_dbcontexModelSnapshot : ModelSnapshot
+    [Migration("20260904154152_5")]
+    partial class _5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

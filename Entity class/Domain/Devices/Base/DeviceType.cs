@@ -7,7 +7,8 @@
         Light,
         RainSensor,
         SecurityAlarm,
-        DoorSensor
+        DoorSensor,
+        Heater
     }
 
 }
