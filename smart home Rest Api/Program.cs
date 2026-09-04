@@ -135,7 +135,7 @@ public class Program
 
         app.mapHomes("/homes");
         app.mapRooms("homes/{homeId:int}/rooms");
-        app.mapdevice("/rooms/{roomId:int}/devices");
+        app.mapDevices("/rooms/{roomId:int}/devices");
 
 
 
