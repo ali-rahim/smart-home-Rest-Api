@@ -30,11 +30,13 @@ namespace smart_home_Rest_Api.Endpoints
 
         }
         static async Task<IResult> CreateHome(
-            Home home,
-            HomeManager homeManager,
-            IOutputCacheStore cacheStore,
-            IMapper mapper)
+           CreateHomeRequest request,
+           HomeManager homeManager,
+           IOutputCacheStore cacheStore,
+           IMapper mapper)
         {
+            var home = new Home(request.Name);
+
             var id = await homeManager.InsertdbhomeAsync(home);
 
             await cacheStore.EvictByTagAsync(cachkey, default);
