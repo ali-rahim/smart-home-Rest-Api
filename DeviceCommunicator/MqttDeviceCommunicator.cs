@@ -4,6 +4,7 @@ using System.Text.Json;
 using MQTTnet;
 using MQTTnet.Protocol;
 
+
 namespace DeviceCommunicator;
 
 public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IAsyncDisposable
@@ -161,7 +162,7 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IAsyncDisposab
 
     private Task OnApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs args)
     {
-        var payload = Encoding.UTF8.GetString(args.ApplicationMessage.PayloadSegment);
+        var payload = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
         var topicParts = args.ApplicationMessage.Topic.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
         if (topicParts.Length != 3 || topicParts[0] != "home")
