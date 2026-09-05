@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Entity class\Entity class.csproj" />
     <ProjectReference Include="..\SmartHoe_dbcontex\SmartHoe_dbcontex.csproj" />
+    <ProjectReference Include="..\DeviceCommunicator\DeviceCommunicator.csproj" />
   </ItemGroup>
 
 </Project>
