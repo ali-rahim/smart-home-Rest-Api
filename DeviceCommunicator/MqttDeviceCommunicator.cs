@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Hosting;
 using MQTTnet;
 using MQTTnet.Protocol;
 
@@ -50,7 +51,7 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IHostedService
             }
             catch (OperationCanceledException)
             {
-                // Application shutdown is expected to cancel the connection loop.
+                // Expected during application shutdown.
             }
         }
 
@@ -58,17 +59,17 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IHostedService
             await _client.DisconnectAsync();
     }
 
-    public async Task<CommandResult> TurnOnAsync(string externalId, CancellationToken cancellationToken = default)
-        => await SendCommandAsync(externalId, "turn_on", cancellationToken);
+    public Task<CommandResult> TurnOnAsync(string externalId, CancellationToken cancellationToken = default)
+        => SendCommandAsync(externalId, "turn_on", cancellationToken);
 
-    public async Task<CommandResult> TurnOffAsync(string externalId, CancellationToken cancellationToken = default)
-        => await SendCommandAsync(externalId, "turn_off", cancellationToken);
+    public Task<CommandResult> TurnOffAsync(string externalId, CancellationToken cancellationToken = default)
+        => SendCommandAsync(externalId, "turn_off", cancellationToken);
 
-    public async Task<CommandResult> GetSensorValueAsync(string externalId, CancellationToken cancellationToken = default)
-        => await SendCommandAsync(externalId, "get_sensor_value", cancellationToken);
+    public Task<CommandResult> GetSensorValueAsync(string externalId, CancellationToken cancellationToken = default)
+        => SendCommandAsync(externalId, "get_sensor_value", cancellationToken);
 
-    public async Task<CommandResult> GetSensorStatusAsync(string externalId, CancellationToken cancellationToken = default)
-        => await SendCommandAsync(externalId, "get_sensor_status", cancellationToken);
+    public Task<CommandResult> GetSensorStatusAsync(string externalId, CancellationToken cancellationToken = default)
+        => SendCommandAsync(externalId, "get_sensor_status", cancellationToken);
 
     private async Task<CommandResult> SendCommandAsync(
         string deviceId,
@@ -236,15 +237,12 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IHostedService
                 case "feedback":
                     HandleFeedback(payload);
                     break;
-
                 case "status":
                     HandleStatus(deviceId, payload);
                     break;
-
                 case "telemetry":
                     HandleTelemetry(deviceId, payload);
                     break;
-
                 case "lwt":
                     HandleLwt(deviceId, payload);
                     break;
