@@ -4,18 +4,21 @@ using System.Text.Json;
 using MQTTnet;
 using MQTTnet.Protocol;
 
-
 namespace DeviceCommunicator;
 
-public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IAsyncDisposable
+public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IHostedService, IAsyncDisposable
 {
     private readonly IMqttClient _client;
     private readonly ConcurrentDictionary<string, TaskCompletionSource<CommandResult>> _pendingCommands = new();
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
+    private readonly CancellationTokenSource _lifetimeCts = new();
+
+    private Task? _connectionTask;
 
     private const string BrokerAddress = "localhost";
     private const int BrokerPort = 1883;
     private const int CommandTimeoutSeconds = 10;
+    private static readonly TimeSpan ReconnectDelay = TimeSpan.FromSeconds(5);
 
     public event EventHandler<DeviceStatusMessage>? StatusReceived;
     public event EventHandler<DeviceTelemetryMessage>? TelemetryReceived;
@@ -27,6 +30,32 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IAsyncDisposab
         _client = factory.CreateMqttClient();
         _client.ApplicationMessageReceivedAsync += OnApplicationMessageReceivedAsync;
         _client.DisconnectedAsync += OnDisconnectedAsync;
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        _connectionTask = MaintainConnectionAsync(_lifetimeCts.Token);
+        return Task.CompletedTask;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _lifetimeCts.Cancel();
+
+        if (_connectionTask is not null)
+        {
+            try
+            {
+                await _connectionTask.WaitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                // Application shutdown is expected to cancel the connection loop.
+            }
+        }
+
+        if (_client.IsConnected)
+            await _client.DisconnectAsync();
     }
 
     public async Task<CommandResult> TurnOnAsync(string externalId, CancellationToken cancellationToken = default)
@@ -98,6 +127,35 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IAsyncDisposab
         finally
         {
             _pendingCommands.TryRemove(commandId, out _);
+        }
+    }
+
+    private async Task MaintainConnectionAsync(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                if (!_client.IsConnected)
+                    await EnsureConnectedAsync(cancellationToken);
+
+                await Task.Delay(ReconnectDelay, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch
+            {
+                try
+                {
+                    await Task.Delay(ReconnectDelay, cancellationToken);
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+            }
         }
     }
 
@@ -194,7 +252,7 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IAsyncDisposab
         }
         catch
         {
-            // A malformed unsolicited MQTT message must not terminate the MQTT receive loop.
+            // A malformed MQTT message must not terminate the MQTT receive loop.
         }
 
         return Task.CompletedTask;
@@ -271,10 +329,13 @@ public sealed class MqttDeviceCommunicator : IDeviceCommunicator, IAsyncDisposab
         _client.ApplicationMessageReceivedAsync -= OnApplicationMessageReceivedAsync;
         _client.DisconnectedAsync -= OnDisconnectedAsync;
 
+        _lifetimeCts.Cancel();
+
         if (_client.IsConnected)
             await _client.DisconnectAsync();
 
         _connectionLock.Dispose();
+        _lifetimeCts.Dispose();
         _client.Dispose();
     }
 
