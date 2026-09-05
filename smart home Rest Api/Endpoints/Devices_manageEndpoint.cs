@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Entity_class.Domain.Devices;
+using Entity_class.Domain.Devices.Base;
 using Microsoft.AspNetCore.OutputCaching;
 using services;
 using smart_home_Asp.net.Domain.Devices.Base;

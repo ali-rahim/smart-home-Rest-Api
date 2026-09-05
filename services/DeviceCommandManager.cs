@@ -1,4 +1,4 @@
-﻿using Entity_class.Domain.Devices;
+﻿using Entity_class.Domain.Devices.Base;
 using Microsoft.EntityFrameworkCore;
 using smart_home_Asp.net.Domain.Devices.ability_interfaces;
 using smart_home_Asp.net.Domain.Devices.Base;
