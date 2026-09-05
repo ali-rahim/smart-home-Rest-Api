@@ -1,4 +1,4 @@
-﻿
+using DeviceCommunicator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
@@ -13,7 +13,6 @@ using smart_home_Rest_Api.Endpoints;
 using SmartHoe_dbcontex;
 using System.Threading.RateLimiting;
 
-
 namespace smart_home_Rest_Api.serviceandpipeline
 {
     public static class HostingExtensions
@@ -21,20 +20,19 @@ namespace smart_home_Rest_Api.serviceandpipeline
         public static WebApplication ConfigureService(this WebApplicationBuilder builder)
         {
             //AutoMapper
-            // قبلی — دیگه کامپایل نمی‌شه
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             //Serilog
             builder.Host.UseSerilog((context, services, configuration) =>
             {
                 configuration
-                    .MinimumLevel.Information() // سطح کلی: Information
-                    .MinimumLevel.Override("smart_home_Asp.net", LogEventLevel.Debug) // Override برای پروژه
+                    .MinimumLevel.Information()
+                    .MinimumLevel.Override("smart_home_Asp.net", LogEventLevel.Debug)
                     .Enrich.FromLogContext()
-                    .WriteTo.Console(outputTemplate:
-                        "serilag")
-                    .ReadFrom.Configuration(context.Configuration); //seq هم تنظیم شده
+                    .WriteTo.Console(outputTemplate: "serilag")
+                    .ReadFrom.Configuration(context.Configuration);
             });
+
             //RateLimiter
             builder.Services.AddRateLimiter(options =>
             {
@@ -47,7 +45,6 @@ namespace smart_home_Rest_Api.serviceandpipeline
                                 partitionKey:
                                     httpContext.Connection.RemoteIpAddress?.ToString()
                                     ?? "unknown",
-
                                 factory: _ => new FixedWindowRateLimiterOptions
                                 {
                                     PermitLimit = 100,
@@ -59,17 +56,15 @@ namespace smart_home_Rest_Api.serviceandpipeline
             //OpenApi
             builder.Services.AddOpenApi();
 
-
             //AddHsts
-            builder.Services.AddHsts(opts => {
+            builder.Services.AddHsts(opts =>
+            {
                 opts.MaxAge = TimeSpan.FromDays(1);
                 opts.IncludeSubDomains = true;
             });
 
-
             //Cache
             builder.Services.AddOutputCache();
-
 
             //DI
             builder.Services.AddScoped<HomeManager>();
@@ -77,10 +72,7 @@ namespace smart_home_Rest_Api.serviceandpipeline
             builder.Services.AddScoped<RoomManager>();
             builder.Services.AddScoped<DeviceCommandManager>();
             builder.Services.AddScoped<DeviceReadingManager>();
-
-
-            //builder.Services.AddScoped<HomeService>();
-
+            builder.Services.AddSingleton<IDeviceCommunicator, MqttDeviceCommunicator>();
 
             //EF
             builder.Services.AddDbContext<SmartHome_dbcontex>((serviceProvider, options) =>
@@ -89,21 +81,14 @@ namespace smart_home_Rest_Api.serviceandpipeline
                 options.UseSqlServer(storageOptions.Value.ConnectionStrings);
             });
 
-
-
-
-
-
             //Configuration
             builder.Services.Configure<SmartHomeOptions>(
-            builder.Configuration.GetSection("SmartHome"));
+                builder.Configuration.GetSection("SmartHome"));
             builder.Services.Configure<StorageOptions>(
-            builder.Configuration.GetSection("Storage"));
+                builder.Configuration.GetSection("Storage"));
 
             return builder.Build();
         }
-
-
 
         public static WebApplication ConfigurePipeline(this WebApplication app)
         {
@@ -117,20 +102,11 @@ namespace smart_home_Rest_Api.serviceandpipeline
             app.MapScalarApiReference();
             app.UseOutputCache();
 
-
-
-
-
-
-
             //Endpoints
-
             app.mapHomes("/homes");
             app.mapRooms("/homes/{homeId:int}/rooms");
             app.mapDevices("/rooms/{roomId:int}/devices");
             app.mapDevices_manage("/devices");
-
-
 
             return app;
         }
