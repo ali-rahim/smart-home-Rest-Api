@@ -15,13 +15,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B916DD31-D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHoe_dbcontex", "SmartHoe_dbcontex\SmartHoe_dbcontex.csproj", "{009E7ED6-B70E-401A-93A7-27549A0736D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Infrastructure", "SmartHome.Infrastructure\SmartHome.Infrastructure.csproj", "{BA3580BF-55DA-452D-85FD-62C005D987FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartHome.Infrastructure.mqtt", "SmartHome.Infrastructure\SmartHome.Infrastructure.mqtt.csproj", "{BA3580BF-55DA-452D-85FD-62C005D987FD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SmartHome.Core", "SmartHome.Core", "{ADFEB666-8CB6-404E-A670-EBA9DB1C2896}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SmartHome.Application", "SmartHome.Application", "{C5C4B905-3ADE-4AEE-8E2F-CA2970687647}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SmartHome.Infrastructure", "SmartHome.Infrastructure", "{2A800AC1-1AA7-42CF-8236-A89C443BB566}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceCommunicator", "DeviceCommunicator\DeviceCommunicator.csproj", "{CC729AED-6487-487E-8394-1E26205A368F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{BA3580BF-55DA-452D-85FD-62C005D987FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA3580BF-55DA-452D-85FD-62C005D987FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA3580BF-55DA-452D-85FD-62C005D987FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC729AED-6487-487E-8394-1E26205A368F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC729AED-6487-487E-8394-1E26205A368F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC729AED-6487-487E-8394-1E26205A368F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC729AED-6487-487E-8394-1E26205A368F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{ADFEB666-8CB6-404E-A670-EBA9DB1C2896} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{C5C4B905-3ADE-4AEE-8E2F-CA2970687647} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{2A800AC1-1AA7-42CF-8236-A89C443BB566} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{CC729AED-6487-487E-8394-1E26205A368F} = {C5C4B905-3ADE-4AEE-8E2F-CA2970687647}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A96D80F-6A8F-4E3A-9C9B-8AC3E5E21074}
