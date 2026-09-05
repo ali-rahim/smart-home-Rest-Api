@@ -33,23 +33,23 @@ namespace smart_home_Rest_Api.serviceandpipeline
                     .ReadFrom.Configuration(context.Configuration);
             });
 
-            //RateLimiter
-            builder.Services.AddRateLimiter(options =>
-            {
-                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            ////RateLimiter
+            //builder.Services.AddRateLimiter(options =>
+            //{
+            //    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-                options.GlobalLimiter =
-                    PartitionedRateLimiter.Create<HttpContext, string>(
-                        partitionKey:
-                            httpContext.Connection.RemoteIpAddress?.ToString()
-                            ?? "unknown",
-                        factory: _ => new FixedWindowRateLimiterOptions
-                        {
-                            PermitLimit = 100,
-                            Window = TimeSpan.FromMinutes(1),
-                            QueueLimit = 0
-                        });
-            });
+            //    options.GlobalLimiter =
+            //        PartitionedRateLimiter.Create<HttpContext, string>(
+            //            partitionKey:
+            //                httpContext.Connection.RemoteIpAddress?.ToString()
+            //                ?? "unknown",
+            //            factory: _ => new FixedWindowRateLimiterOptions
+            //            {
+            //                PermitLimit = 100,
+            //                Window = TimeSpan.FromMinutes(1),
+            //                QueueLimit = 0
+            //            });
+            //});
 
             //OpenApi
             builder.Services.AddOpenApi();
@@ -100,7 +100,7 @@ namespace smart_home_Rest_Api.serviceandpipeline
             app.UseHttpsRedirection();
             app.UseExceptionHandlingMiddleware();
             app.UseRequestLoggingMiddleware();
-            app.UseRateLimiter();
+            //app.UseRateLimiter();
             app.MapOpenApi();
             app.MapScalarApiReference();
             app.UseOutputCache();
