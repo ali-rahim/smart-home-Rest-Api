@@ -40,17 +40,15 @@ namespace smart_home_Rest_Api.serviceandpipeline
 
                 options.GlobalLimiter =
                     PartitionedRateLimiter.Create<HttpContext, string>(
-                        httpContext =>
-                            RateLimitPartition.GetFixedWindowLimiter(
-                                partitionKey:
-                                    httpContext.Connection.RemoteIpAddress?.ToString()
-                                    ?? "unknown",
-                                factory: _ => new FixedWindowRateLimiterOptions
-                                {
-                                    PermitLimit = 100,
-                                    Window = TimeSpan.FromMinutes(1),
-                                    QueueLimit = 0
-                                }));
+                        partitionKey:
+                            httpContext.Connection.RemoteIpAddress?.ToString()
+                            ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 100,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0
+                        });
             });
 
             //OpenApi
@@ -72,7 +70,12 @@ namespace smart_home_Rest_Api.serviceandpipeline
             builder.Services.AddScoped<RoomManager>();
             builder.Services.AddScoped<DeviceCommandManager>();
             builder.Services.AddScoped<DeviceReadingManager>();
-            builder.Services.AddSingleton<IDeviceCommunicator, MqttDeviceCommunicator>();
+
+            builder.Services.AddSingleton<MqttDeviceCommunicator>();
+            builder.Services.AddSingleton<IDeviceCommunicator>(
+                serviceProvider => serviceProvider.GetRequiredService<MqttDeviceCommunicator>());
+            builder.Services.AddHostedService(
+                serviceProvider => serviceProvider.GetRequiredService<MqttDeviceCommunicator>());
 
             //EF
             builder.Services.AddDbContext<SmartHome_dbcontex>((serviceProvider, options) =>
